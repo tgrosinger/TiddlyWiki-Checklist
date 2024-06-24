@@ -20,6 +20,16 @@ exports.init = function(parser) {
 	this.matchRegExp = /^\[([ xX])\] .*$/mg;
 };
 
+	/*New option to hide the input form group above the checklist*/
+exports.showInput= function() {
+    var configWidgetTitle = "$:/plugins/tgrosinger/tw5-checklist/Configuration";
+    var configWidgetFields = $tw.wiki.getTiddler(configWidgetTitle).fields;
+
+    var showInputBlock = configWidgetFields["show-input"] || "true";
+    return (showInputBlock === "true");
+}
+
+	
 /*
 Retrieve the configuration state of the clear all button
 */
@@ -45,6 +55,9 @@ exports.parse = function() {
     listItems.push({
         type: "element",
         tag: "li",
+        attributes: {
+                class: {type: "string", value: (this.showInput()?"":"hideme")}
+        },
         children: [
             {
                 type: "element",

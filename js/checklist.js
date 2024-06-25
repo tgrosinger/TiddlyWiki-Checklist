@@ -116,8 +116,8 @@ CheckListWidget.prototype.handleClearChecksEvent = function(event) {
 
     // Save the updated body
     var newBody = tiddlerBody.substring(0, this.startPos) +
-                  bodyList.join("\n") +
-                  tiddlerBody.substring(this.stopPos);
+                    bodyList.join("\n") +
+                    tiddlerBody.substring(this.stopPos);
     $tw.wiki.setText(this.tiddlerTitle, "text", null, newBody);
 };
 
@@ -133,25 +133,37 @@ CheckListWidget.prototype.reorderList = function(event, bodyList) {
     // Sort items  (if configured to do so)
     var shouldSort = this.shouldSort();
 
-    // These are all combinations
-    if (shouldMove) {
-        // Find the index of the first checked item
-        if (shouldSort){
-            // sort by items subject, grouping checked and unchecked
-            bodyList.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
-        }else{
-            // Order only by 3 first chars, so we have order by grouping check and unchecked 
-            bodyList.sort(function (a, b) { return a.substring(0, 3).toLowerCase().localeCompare(b.substring(0, 3).toLowerCase()); });
+    // 分离注释行和活动行
+    var activeItems = [];
+    var commentedItems = [];
+    for (var i = 0; i < bodyList.length; i++) {
+        // 检查是否为注释行，使用 trim() 去除首尾空格
+        if (bodyList[i].trim().startsWith("<!--") && bodyList[i].trim().endsWith("-->")) { 
+            commentedItems.push(bodyList[i]);
+        } else {
+            activeItems.push(bodyList[i]);
         }
-    }else if(shouldSort){
-        // sort by items subject
-       bodyList.sort(function (a, b) { return a.substring(3).toLowerCase().localeCompare(b.substring(3).toLowerCase()); });
     }
+
+    // 对未注释的行进行排序或重新排列
+    if (shouldMove) {
+        if (shouldSort) {
+            activeItems.sort(function (a, b) { return a.toLowerCase().localeCompare(b.toLowerCase()); });
+        } else {
+            // 移除注释标记后再排序
+            activeItems.sort(function (a, b) { return a.replace(/<!--.*?-->/g, "").trim().toLowerCase().localeCompare(b.replace(/<!--.*?-->/g, "").trim().toLowerCase()); });
+        }
+    } else if (shouldSort) {
+        activeItems.sort(function (a, b) { return a.replace(/<!--.*?-->/g, "").trim().toLowerCase().localeCompare(b.replace(/<!--.*?-->/g, "").trim().toLowerCase()); });
+    }
+
+    // 将排序/重新排列后的 activeItems 和注释行合并
+    bodyList = activeItems.concat(commentedItems);
     
     // Save the updated body
     var newBody = tiddlerBody.substring(0, this.startPos) +
-                  bodyList.join("\n") +
-                  tiddlerBody.substring(this.stopPos);
+                    bodyList.join("\n") +
+                    tiddlerBody.substring(this.stopPos);
     $tw.wiki.setText(this.tiddlerTitle, "text", null, newBody);
 
 }
@@ -215,10 +227,10 @@ CheckListWidget.prototype.handleRemoveEvent = function (event) {
     var bodyList = tiddlerBody.substring(this.startPos, this.stopPos).split("\n");
 
     // Update the tiddler data
-    bodyList.splice(itemIndex, 1);
+    bodyList[itemIndex] = `<!-- ${bodyList[itemIndex]} -->`;
     var newBody = tiddlerBody.substring(0, this.startPos) +
-                  bodyList.join("\n") +
-                  tiddlerBody.substring(this.stopPos);
+                    bodyList.join("\n") +
+                    tiddlerBody.substring(this.stopPos);
     $tw.wiki.setText(this.tiddlerTitle, "text", null, newBody);
 };
 

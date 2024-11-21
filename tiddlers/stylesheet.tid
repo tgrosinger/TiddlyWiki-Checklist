@@ -5,20 +5,23 @@ ul.checklist {
     list-style: none;
     margin: 0;
     padding: 0;
+    display: grid;
+    /* Set grid-template-columns to two columns, and use the minmax function to ensure that the first column has at least enough space to accommodate the input box and add button */
+    grid-template-columns: minmax(0, 1fr) auto; 
+    grid-auto-rows: min-content; /* Ensure that the height of each row is automatically adjusted according to the content */
 }
-
 ul.checklist > li {
     position: relative;
     width: calc(100% - 1em);
+	grid-column: span 2; /*The default is to fill both columns of the gird*/
 }
-
-
 /* input form */
-
+.hideme {
+    display:none;
+}
 .checklist-newitem-icon::before {
     content: "&#x270e;";
 }
-
 input.checklist-newitem {
     margin-left: 1em;
     margin-bottom: 0.75em;
@@ -26,45 +29,24 @@ input.checklist-newitem {
     border: none;
     border-bottom: solid 2px <<colour sidebar-tab-background>>;
     transition: border 0.3s;
-    width: calc(100% - 2em - 20px);
+    width: calc(100% - 2em - 20px - 18px); /* Adjust width to fit + button */
+    display: inline-block; /* Change to inline-block */
+    vertical-align: top; /* Align with button */
 }
-
 input:focus.checklist-newitem {
     border-bottom: solid 2px <<colour notification-border>>;
 }
-
-
 /* placeholder text */
-
-::-webkit-input-placeholder { 
-  color: #444;
-  font-style: italic;
-}
-::-moz-placeholder { 
-  color: #444;
-  font-style: italic;
-}
-:-ms-input-placeholder { 
-  color: #444;
-  font-style: italic;
-}
-:-moz-placeholder { 
-  color: #444;
-  font-style: italic;
-}
-::placeholder {
-  color: #444;
-  font-style: italic;
-}
-
-
+-webkit-input-placeholder { color: #444; font-style: italic; }
+::-moz-placeholder { color: #444; font-style: italic; }
+:-ms-input-placeholder { color: #444; font-style: italic; }
+:-moz-placeholder { color: #444; font-style: italic; }
+::placeholder { color: #444; font-style: italic; }
 /* list items content */
-
 .checklist li input[type="checkbox"] {
     vertical-align: top;
     margin-top: 4px;
 }
-
 .checklist label {
     display: inline-block;
     position: relative;
@@ -73,24 +55,20 @@ input:focus.checklist-newitem {
     left: 1.4em;
     width: calc(100% - 2em - 20px);
 }
-
 .checklist > li:hover label, 
 .checklist input[type="checkbox"]:hover + button + label, 
 .checklist input[type="checkbox"]:focus + button + label  {
     background-color: <<colour sidebar-tab-background>>;
 }
-
 input:checked + .checklist-remove + label {
     opacity: 0.5;
 }
-
 .checklist li input + .checklist-remove:hover + label,
 .checklist li input + .checklist-remove:focus + label  {
     background-color:  rgba(255,0,0,0.25);
     opacity: 0.8;
     border-radius: 5px;
 }
-
 /* strike checked items only if set in user configuration */
 <$list filter="[[$:/plugins/tgrosinger/tw5-checklist/Configuration]field:strike-checked[true]]">
 input:checked + .checklist-remove + label {
@@ -100,21 +78,23 @@ input:checked + .checklist-remove + label {
 
 
 /* buttons */
-
 button.checklist-add {
     position: relative;
     left: 0.75em;
     width: 18px;
     height: 18px;
     border-radius: 5px;
-background-image: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2211%22%20height%3D%2211%22%3E%0A%3Crect%20width%3D%221%22%20height%3D%227%22%20x%3D%225%22%20y%3D%222%22%20fill%3D%22%239B9B9B%22%2F%3E%0A%3Crect%20width%3D%227%22%20height%3D%221%22%20x%3D%222%22%20y%3D%225%22%20fill%3D%22%239B9B9B%22%2F%3E%0A%3C%2Fsvg%3E');
+    background-image: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2211%22%20height%3D%2211%22%3E%0A%3Crect%20width%3D%221%22%20height%3D%227%22%20x%3D%225%22%20y%3D%222%22%20fill%3D%22%239B9B9B%22%2F%3E%0A%3Crect%20width%3D%227%22%20height%3D%221%22%20x%3D%222%22%20y%3D%225%22%20fill%3D%22%239B9B9B%22%2F%3E%0A%3C%2Fsvg%3E');
     background-size: 100%;
+    display: inline-block; /* Change to inline-block */
+    /* align-self: center;*/
+    vertical-align: top; /* Align with input */
+	border: 1px solid <<colour sidebar-tab-background>>; /* Add border similar to clearall button */
+	cursor: pointer; /* Change cursor to pointer on hover */
 }
-
 button.checklist-add:hover, button.checklist-add:focus {
     background-color: <<colour sidebar-tab-background>>;
 }
-
 button.checklist-remove {
     display: block;
     position: absolute;
@@ -124,33 +104,32 @@ button.checklist-remove {
     height: 18px;
     border-radius: 5px;
     color: <<colour sidebar-muted-foreground>>;
-background-image: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2211%22%20height%3D%2211%22%3E%0A%3Crect%20width%3D%225%22%20height%3D%221%22%20x%3D%223%22%20y%3D%225%22%20fill%3D%22%23444%22%2F%3E%0A%3C%2Fsvg%3E');
+    background-image: url('data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2211%22%20height%3D%2211%22%3E%0A%3Crect%20width%3D%225%22%20height%3D%221%22%20x%3D%223%22%20y%3D%225%22%20fill%3D%22%23444%22%2F%3E%0A%3C%2Fsvg%3E');
     background-size: 100%;
 /*    background-color: <<colour sidebar-tab-background-selected>>; */
     border: 1px solid <<colour sidebar-tab-background>>;
 }
-
 ul.checklist > li:hover button.checklist-remove {
     color: <<colour sidebar-muted-foreground-hover>>;
 }
-
 button.checklist-remove:hover,
 button.checklist-remove:focus {
     color:  <<colour dirty-indicator>>;
     background-color: <<colour sidebar-tab-background>>;
 }
-
 button.checklist-clearall {
-    margin-top: 0.75em;
+    /*margin-top: 0.75em;*/
+    display: inline-block; /* Change to inline-block */
+    vertical-align: top; /* Align with input and add button */
+    white-space: nowrap; /* Display without wrapping */
 }
-
 button.checklist-clearall::before {
     content: "↻ ";
 }
-
-
-/* visualliy hidden, accessible for screen reader */
-
+button.checklist-clearall:hover {
+  background-color: <<colour sidebar-tab-background>>; /* Add hover effects such as background color changes */
+}
+/* visually hidden, accessible for screen reader */
 .checklist-vh {
     position: absolute !important;
     clip: rect(1px, 1px, 1px, 1px);
@@ -159,4 +138,22 @@ button.checklist-clearall::before {
     height: 1px !important;
     width: 1px !important;
     overflow: hidden;
+}
+
+ul.checklist > li:last-child:has(button.checklist-clearall) { 
+  grid-column: 2;
+  grid-row: 1;
+  vertical-align: top;
+  /*align-self: center;*/
+  display: inline-block; /* Add display: inline-block */
+}
+ul.checklist > li:first-child:has(input.checklist-newitem) {
+  grid-column: 1;
+  grid-row: 1;
+  /*align-self: center*/; /* Consistent vertical alignment with input boxes and add buttons */
+  /*line-height: 1.5em; */ /* Manually set the line height to match the height of the input box */
+}
+/* When the Clear All button is not present, the first line takes up the entire line */
+ul.checklist > li:first-child:has(input.checklist-newitem):not(:has(~ li:has(button.checklist-clearall))) { 
+  grid-column: span 2; 
 }

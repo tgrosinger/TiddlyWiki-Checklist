@@ -14,12 +14,22 @@ exports.name = "checkbox";
 exports.types = {inline: true};
 
 exports.init = function(parser) {
-	this.parser = parser;
+    this.parser = parser;
 
-	// Match on [ ], [x], and [X], to the end of the line
-	this.matchRegExp = /^\[([ xX])\] .*$/mg;
+    // 匹配 [ ], [x], [X] 和 HTML 注释
+    this.matchRegExp = /^(?:<!--\s*\[([ xX])\]\s*(.*?)-->)?(?:\[\s*([ xX])\]\s*(.*))$/mg;
 };
 
+/*New option to hide the input form group above the checklist*/
+exports.showInput= function() {
+    var configWidgetTitle = "$:/plugins/tgrosinger/tw5-checklist/Configuration";
+    var configWidgetFields = $tw.wiki.getTiddler(configWidgetTitle).fields;
+
+    var showInputBlock = configWidgetFields["show-input"] || "true";
+    return (showInputBlock === "true");
+}
+
+    
 /*
 Retrieve the configuration state of the clear all button
 */
@@ -45,6 +55,9 @@ exports.parse = function() {
     listItems.push({
         type: "element",
         tag: "li",
+        attributes: {
+                class: {type: "string", value: (this.showInput()?"":"hideme")}
+        },
         children: [
             {
                 type: "element",
@@ -106,9 +119,18 @@ exports.parse = function() {
     do {
         var startPos = this.parser.pos;
         this.parser.pos = this.matchRegExp.lastIndex;
+
+        // 检查是否为注释行
+        var isCommented = this.parser.source.substring(startPos, startPos + 4) === "<!--";
+
+        // 提取 checkbox 状态和内容
+        var checkboxState = isCommented ? match[1] : match[3];
+        var content = isCommented ? match[2] : match[4];
+
+        // 解析列表项内容，跳过注释标记
         var parseResults = this.parser.wiki.parseText(
                 "text/vnd.tiddlywiki",
-                this.parser.source.substring(startPos + 4, this.parser.pos),
+                content.trim(),
                 {parseAsInline: true});
 
         // Use the listitem body as a label for the checkbox to get better accessibility
@@ -130,9 +152,11 @@ exports.parse = function() {
                 id: {type: "string", value: match.index}
             }
         };
-        if (match[1] === "x" || match[1] === "X") {
+        // 根据 checkboxState 设置 checked 属性
+        if (checkboxState === "x" || checkboxState === "X") {
             checkbox.attributes.checked = {type: "boolean", value: true};
         }
+
 
         // Make a button to delete the item
         var removelabel = {
